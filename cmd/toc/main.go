@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/drgrib/alfred-bear/db"
+	"github.com/msageryd/alfred-obsidian/db"
 )
 
 func main() {

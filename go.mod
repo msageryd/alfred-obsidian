@@ -1,4 +1,4 @@
-module github.com/drgrib/alfred-bear
+module github.com/msageryd/alfred-obsidian
 
 go 1.21
 

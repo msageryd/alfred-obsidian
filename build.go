@@ -158,7 +158,7 @@ func createWorkflowZip(filename string) {
 		}
 
 		// Skip .git directory, build directory, build.go, and existing .alfredworkflow files
-		if info.IsDir() && (info.Name() == ".git" || info.Name() == "build" || info.Name() == "cmd" || info.Name() == "core" || info.Name() == "db" || info.Name() == "doc") {
+		if info.IsDir() && (info.Name() == ".git" || info.Name() == "build") {
 			return filepath.SkipDir
 		}
 		if info.Name() == "build.go" || strings.HasSuffix(info.Name(), ".alfredworkflow") {

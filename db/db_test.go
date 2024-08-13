@@ -5,7 +5,7 @@ import (
 
 	"github.com/smartystreets/assertions"
 
-	"github.com/drgrib/alfred-bear/db"
+	"github.com/msageryd/alfred-obsidian/db"
 )
 
 func TestRemoveTagHashes(t *testing.T) {

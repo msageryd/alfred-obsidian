@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/drgrib/alfred-bear/db"
+	"github.com/msageryd/alfred-obsidian/db"
 )
 
 var special = []string{

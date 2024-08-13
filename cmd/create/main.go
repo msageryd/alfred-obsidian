@@ -5,8 +5,8 @@ import (
 
 	"github.com/drgrib/alfred"
 
-	"github.com/drgrib/alfred-bear/core"
-	"github.com/drgrib/alfred-bear/db"
+	"github.com/msageryd/alfred-obsidian/core"
+	"github.com/msageryd/alfred-obsidian/db"
 )
 
 func main() {

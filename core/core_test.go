@@ -5,7 +5,7 @@ import (
 
 	"github.com/smartystreets/assertions"
 
-	"github.com/drgrib/alfred-bear/core"
+	"github.com/msageryd/alfred-obsidian/core"
 )
 
 func TestParseQuery(t *testing.T) {

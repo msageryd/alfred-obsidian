@@ -16,71 +16,54 @@ import (
 )
 
 const (
-	DbPath = "~/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite"
-
-	TitleKey  = "ZTITLE"
-	TextKey   = "ZTEXT"
+	DbPath = "~/Library/Mobile Documents/iCloud~md~obsidian/Documents/the-vault/.obsidian/plugins/obsidian-sqllite-sync/alfred-sync.db"
+	
+	TitleKey  = "title"
+	TextKey   = "content"
 	TagsKey   = "TAGS"
-	NoteIDKey = "ZUNIQUEIDENTIFIER"
+	NoteIDKey = "path"
 
 	RECENT_NOTES = `
-SELECT
-    note.ZUNIQUEIDENTIFIER,
-    note.ZTITLE,
-    GROUP_CONCAT(tag.ZTITLE) AS TAGS
-FROM
-    ZSFNOTE note
-LEFT JOIN
-    Z_5TAGS nTag ON note.Z_PK = nTag.Z_5NOTES
-LEFT JOIN
-    ZSFNOTETAG tag ON nTag.Z_13TAGS = tag.Z_PK
-WHERE
-    note.ZARCHIVED = 0
-    AND note.ZTRASHED = 0
-GROUP BY
-    note.ZUNIQUEIDENTIFIER,
-    note.ZTITLE
-ORDER BY
-    note.ZMODIFICATIONDATE DESC
-LIMIT 25
-	`
+		SELECT 
+			note.path, 
+			note.title,
+			GROUP_CONCAT(ntag.tag_name) AS tags
+		FROM
+			note
+		LEFT JOIN
+			note_tag ntag ON note.path = nTag.note_path
+		--WHERE    note.ZARCHIVED = 0    AND note.ZTRASHED = 0
+		GROUP BY
+			note.path,
+			note.title
+		ORDER BY
+			note.last_modified DESC
+		LIMIT 25
+	`;
 
 	NOTES_BY_QUERY = `
-SELECT
-    note.ZUNIQUEIDENTIFIER,
-    note.ZTITLE,
-    GROUP_CONCAT(tag.ZTITLE) AS TAGS
-FROM
-    ZSFNOTE note
-LEFT JOIN
-    Z_5TAGS nTag ON note.Z_PK = nTag.Z_5NOTES
-LEFT JOIN
-    ZSFNOTETAG tag ON nTag.Z_13TAGS = tag.Z_PK
-WHERE
-	note.ZUNIQUEIDENTIFIER IN (
 		SELECT
-			note.ZUNIQUEIDENTIFIER
+			note.path, 
+			note.title,
+			GROUP_CONCAT(ntag.tag_name) AS tags
 		FROM
-			ZSFNOTE note
+				note
 		LEFT JOIN
-			ZSFNOTEFILE images ON images.ZNOTE = note.Z_PK
+				note_tag ntag ON note.path = nTag.note_path
 		WHERE
-			note.ZARCHIVED = 0
-			AND note.ZTRASHED = 0
-			AND note.ZTEXT IS NOT NULL
+			note.content IS NOT NULL
 			AND (
-				utflower(note.ZTITLE) LIKE utflower('%'||$1||'%') OR
-				utflower(note.ZTEXT) LIKE utflower('%'||$1||'%') OR
-				images.ZSEARCHTEXT LIKE utflower('%'||$1||'%')
+				note.title LIKE lower('%'||$1||'%' OR
+				note.content LIKE '%'||$1||'%'
+				--OR images.ZSEARCHTEXT LIKE utflower('%'||$1||'%')
 			)
-	)
-GROUP BY
-    note.ZUNIQUEIDENTIFIER,
-    note.ZTITLE
-ORDER BY
-    CASE WHEN utflower(note.ZTITLE) LIKE utflower('%'||$1||'%') THEN 0 ELSE 1 END,
-    note.ZMODIFICATIONDATE DESC
-LIMIT 200
+		GROUP BY
+				note.path,
+				note.title
+		ORDER BY
+				CASE WHEN note.title LIKE ('%'||$1||'%' THEN 0 ELSE 1 END,
+				note.last_modified DESC
+		LIMIT 200;
 `
 
 	NOTES_BY_TAGS_AND_QUERY = `
@@ -132,50 +115,42 @@ LIMIT 200
 `
 
 	TAGS_BY_TITLE = `
-SELECT
-    DISTINCT t.ZTITLE
-FROM
-    ZSFNOTE n
-INNER JOIN
-    Z_5TAGS nt ON n.Z_PK = nt.Z_5NOTES
-INNER JOIN
-    ZSFNOTETAG t ON nt.Z_13TAGS = t.Z_PK
-WHERE
-    n.ZARCHIVED = 0
-    AND n.ZTRASHED = 0
-    AND UTFLOWER(t.ZTITLE) LIKE UTFLOWER('%%%s%%')
-ORDER BY
-    t.ZMODIFICATIONDATE DESC
-LIMIT 25
-
+		SELECT
+				nt.tag_name
+		FROM
+				note n
+		INNER JOIN
+				note_tag nt ON n.path = nt.note_path
+		WHERE
+			nt.tag_name LIKE '%%%s%%' 
+		ORDER BY
+				n.last_modified DESC
+		LIMIT 25
 `
 
 	NOTE_TITLE_BY_ID = `
-SELECT
-    DISTINCT ZTITLE
-FROM
-    ZSFNOTE
-WHERE
-    ZARCHIVED = 0
-    AND ZTRASHED = 0
-    AND ZUNIQUEIDENTIFIER = '%s'
-ORDER BY
-    ZMODIFICATIONDATE DESC
-LIMIT 25
-`
+	SELECT
+			title
+		FROM
+			note
+		WHERE
+			path = '%s'
+		ORDER BY
+			last_modified DESC
+		LIMIT 25;
+	`
+
 	NOTE_TEXT_BY_ID = `
-    SELECT
-    DISTINCT ZTEXT
-FROM
-    ZSFNOTE
-WHERE
-    ZARCHIVED = 0
-    AND ZTRASHED = 0
-    AND ZUNIQUEIDENTIFIER = '%s'
-ORDER BY
-    ZMODIFICATIONDATE DESC
-LIMIT 25
-`
+		SELECT
+			content
+		FROM
+			note
+		WHERE
+			path = '%s'
+		ORDER BY
+			last_modified DESC
+		LIMIT 25;
+	`
 )
 
 type TagQueryArg struct {
@@ -206,20 +181,20 @@ type LiteDB struct {
 }
 
 func NewLiteDB(path string) (LiteDB, error) {
-	sql.Register("sqlite3_custom", &sqlite3.SQLiteDriver{
-		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-			return conn.RegisterFunc("utflower", utfLower, true)
-		},
-	})
+	// sql.Register("sqlite3_custom", &sqlite3.SQLiteDriver{
+	// 	ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+	// 		return conn.RegisterFunc("utflower", utfLower, true)
+	// 	},
+	// })
 
-	db, err := sql.Open("sqlite3_custom", path)
+	db, err := sql.Open("sqlite3", path)
 	litedb := LiteDB{db}
 	return litedb, err
 }
 
-func utfLower(s string) string {
-	return strings.ToLower(s)
-}
+// func utfLower(s string) string {
+// 	return strings.ToLower(s)
+// }
 
 func NewBearDB() (LiteDB, error) {
 	path := Expanduser(DbPath)
@@ -335,6 +310,7 @@ func (litedb LiteDB) QueryNotesByTextAndTags(text string, tags []string) ([]Note
 
 func (litedb LiteDB) QueryNotesByText(text string) ([]Note, error) {
 	wordQuery := func(word string) ([]Note, error) {
+		word = strings.ToLower(word)
 		word = escape(word)
 		return litedb.Query(NOTES_BY_QUERY, word)
 	}

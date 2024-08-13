@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/drgrib/alfred-bear/db"
+	"github.com/msageryd/alfred-obsidian/db"
 )
 
 type TagQueryArg struct {
