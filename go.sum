@@ -1,7 +1,7 @@
 github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzbY=
 github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
-github.com/drgrib/alfred v0.0.0-20180713231015-cbcb1a4b1a30 h1:YJztq9iEgAjAxoyya/tNRcI3MHH3oZIu6cdwUOSCSAc=
-github.com/drgrib/alfred v0.0.0-20180713231015-cbcb1a4b1a30/go.mod h1:i0gA+4g42sioTtf5J8DHLunASnD4RhyzXQqVNeoTV/o=
+github.com/drgrib/alfred v0.0.0-20230720171042-dc4eb4f91fde h1:dYkT/4nkgrdv4+/Sn144Uk3/22srXx+2lSyWPHbpweI=
+github.com/drgrib/alfred v0.0.0-20230720171042-dc4eb4f91fde/go.mod h1:i0gA+4g42sioTtf5J8DHLunASnD4RhyzXQqVNeoTV/o=
 github.com/drgrib/mac v0.0.0-20200321221020-4f366006daac h1:dbnAsr/ngd8DSzd3x/2CGQ8ubL5oX2R+Cwdin66Snbc=
 github.com/drgrib/mac v0.0.0-20200321221020-4f366006daac/go.mod h1:UaS3hPRZNCmKPJ1c9eKlIaehAOpSpBDLEsJTP/U6BSs=
 github.com/mattn/go-sqlite3 v1.14.9 h1:10HX2Td0ocZpYEjhilsuo6WWtUqttj2Kb0KtD86/KYA=
