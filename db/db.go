@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	DbPath = "~/Library/Mobile Documents/iCloud~md~obsidian/Documents/the-vault/.obsidian/plugins/obsidian-sqllite-sync/alfred-sync.db"
+	DbPath = "/Users/michaelsageryd/Library/Mobile Documents/iCloud~md~obsidian/Documents/the-vault/.obsidian/plugins/obsidian-sqlite-sync/alfred_sync.db"
 	
 	TitleKey  = "title"
 	TextKey   = "content"
-	TagsKey   = "TAGS"
+	TagsKey   = "tags"
 	NoteIDKey = "path"
 
 	RECENT_NOTES = `
@@ -32,7 +32,6 @@ const (
 			note
 		LEFT JOIN
 			note_tag ntag ON note.path = nTag.note_path
-		--WHERE    note.ZARCHIVED = 0    AND note.ZTRASHED = 0
 		GROUP BY
 			note.path,
 			note.title
@@ -51,17 +50,13 @@ const (
 		LEFT JOIN
 				note_tag ntag ON note.path = nTag.note_path
 		WHERE
-			note.content IS NOT NULL
-			AND (
-				note.title LIKE lower('%'||$1||'%' OR
-				note.content LIKE '%'||$1||'%'
-				--OR images.ZSEARCHTEXT LIKE utflower('%'||$1||'%')
-			)
+			note.title LIKE '%'||$1||'%' OR
+			note.content_lower LIKE '%'||$1||'%'
 		GROUP BY
 				note.path,
 				note.title
 		ORDER BY
-				CASE WHEN note.title LIKE ('%'||$1||'%' THEN 0 ELSE 1 END,
+				CASE WHEN note.title LIKE '%'||$1||'%' THEN 0 ELSE 1 END,
 				note.last_modified DESC
 		LIMIT 200;
 `
@@ -181,20 +176,20 @@ type LiteDB struct {
 }
 
 func NewLiteDB(path string) (LiteDB, error) {
-	// sql.Register("sqlite3_custom", &sqlite3.SQLiteDriver{
-	// 	ConnectHook: func(conn *sqlite3.SQLiteConn) error {
-	// 		return conn.RegisterFunc("utflower", utfLower, true)
-	// 	},
-	// })
+	sql.Register("sqlite3_custom", &sqlite3.SQLiteDriver{
+		ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+			return conn.RegisterFunc("utflower", utfLower, true)
+		},
+	})
 
-	db, err := sql.Open("sqlite3", path)
+	db, err := sql.Open("sqlite3_custom", path)
 	litedb := LiteDB{db}
 	return litedb, err
 }
 
-// func utfLower(s string) string {
-// 	return strings.ToLower(s)
-// }
+ func utfLower(s string) string {
+ 	return strings.ToLower(s)
+ }
 
 func NewBearDB() (LiteDB, error) {
 	path := Expanduser(DbPath)

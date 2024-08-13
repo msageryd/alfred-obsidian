@@ -63,16 +63,17 @@ func getUniqueTagString(tagString string) string {
 }
 
 func RowToItem(row db.Note, query Query) alfred.Item {
-	searchCallbackString := getSearchCallbackString(query)
+	// searchCallbackString := getSearchCallbackString(query)
 	return alfred.Item{
 		Title:    row[db.TitleKey],
 		Subtitle: getUniqueTagString(row[db.TagsKey]),
-		Arg: strings.Join([]string{
-			row[db.NoteIDKey],
-			searchCallbackString,
-		},
-			argSplit,
-		),
+		// Arg: strings.Join([]string{
+		// 	row[db.NoteIDKey],
+		// 	searchCallbackString,
+		// },
+		// 	argSplit,
+		// ),
+		Arg: row[db.NoteIDKey],
 		Valid: alfred.Bool(true),
 	}
 }
@@ -305,9 +306,9 @@ func getSearchCallbackString(query Query) string {
 }
 
 func GetAppSearchItem(query Query) (*alfred.Item, error) {
-	title := "Search in Bear App"
+	title := "Search in Obsidian vault"
 	if query.WordString != "" {
-		title = fmt.Sprintf("Search %#v in Bear App", query.WordString)
+		title = fmt.Sprintf("Search %#v in Obsidian vault", query.WordString)
 	}
 
 	callbackString := getSearchCallbackString(query)
