@@ -1,6 +1,4 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
@@ -12,7 +10,7 @@
                 "go build toc",
                 "go build create",
                 "go build setcursor",
-                "go build wiki-link",
+                "go build wiki-link"
             ],
             "group": "build"
         },
@@ -24,7 +22,7 @@
             },
             "command": "rm -f csearch; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -37,7 +35,7 @@
             },
             "command": "rm -f search; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -50,7 +48,7 @@
             },
             "command": "rm -f link; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -63,7 +61,7 @@
             },
             "command": "rm -f toc; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -76,7 +74,7 @@
             },
             "command": "rm -f create; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -89,7 +87,7 @@
             },
             "command": "rm -f setcursor; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
@@ -102,10 +100,21 @@
             },
             "command": "rm -f wiki-link; go build",
             "presentation": {
-                "focus": true,
+                "focus": true
             },
             "group": "build",
             "problemMatcher": []
         },
+        {
+            "label": "Run build.go",
+            "type": "shell",
+            "command": "go run build.go",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
     ]
 }

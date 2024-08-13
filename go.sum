@@ -2,8 +2,11 @@ github.com/atotto/clipboard v0.1.2 h1:YZCtFu5Ie8qX2VmVTBnrqLSiU9XOWwqNRmdT3gIQzb
 github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/drgrib/alfred v0.0.0-20230720171042-dc4eb4f91fde h1:dYkT/4nkgrdv4+/Sn144Uk3/22srXx+2lSyWPHbpweI=
 github.com/drgrib/alfred v0.0.0-20230720171042-dc4eb4f91fde/go.mod h1:i0gA+4g42sioTtf5J8DHLunASnD4RhyzXQqVNeoTV/o=
+github.com/drgrib/alfred v0.0.0-20240123181105-41e73b816084 h1:xXeRw6+0eiIjAit9pAye37dEu7ggUQ8YYB3mMB5gN0k=
+github.com/drgrib/alfred v0.0.0-20240123181105-41e73b816084/go.mod h1:i0gA+4g42sioTtf5J8DHLunASnD4RhyzXQqVNeoTV/o=
 github.com/drgrib/mac v0.0.0-20200321221020-4f366006daac h1:dbnAsr/ngd8DSzd3x/2CGQ8ubL5oX2R+Cwdin66Snbc=
 github.com/drgrib/mac v0.0.0-20200321221020-4f366006daac/go.mod h1:UaS3hPRZNCmKPJ1c9eKlIaehAOpSpBDLEsJTP/U6BSs=
+github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/mattn/go-sqlite3 v1.14.9 h1:10HX2Td0ocZpYEjhilsuo6WWtUqttj2Kb0KtD86/KYA=
 github.com/mattn/go-sqlite3 v1.14.9/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
@@ -12,3 +15,7 @@ github.com/smartystreets/assertions v1.1.1 h1:T/YLemO5Yp7KPzS+lVtu+WsHn8yoSwTfIt
 github.com/smartystreets/assertions v1.1.1/go.mod h1:tcbTF8ujkAEcZ8TElKY+i30BzYlVhC/LOxJk7iOWnoo=
 golang.org/x/text v0.3.8 h1:nAL+RVCQ9uMn3vJZbV+MRnydTJFPf8qqY42YiA6MrqY=
 golang.org/x/text v0.3.8/go.mod h1:E6s5w1FMmriuDzIBO73fBruAKo1PCIq6d2Q6DHfQ8WQ=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0/go.mod h1:WDnlLJ4WF5VGsH/HVa3CI79GS0ol3YnhVnKP89i0kNg=
+howett.net/plist v1.0.1 h1:37GdZ8tP09Q35o9ych3ehygcsL+HqKSwzctveSlarvM=
+howett.net/plist v1.0.1/go.mod h1:lqaXoTrLY4hg8tnEzNru53gicrbv7rrk+2xJA/7hw9g=
