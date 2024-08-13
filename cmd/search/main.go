@@ -7,7 +7,7 @@ import (
 	"github.com/drgrib/alfred"
 
 	"github.com/drgrib/alfred-bear/core"
-	"github.com/drgrib/alfred-bear/db"
+	"../db/db"
 )
 
 func main() {
