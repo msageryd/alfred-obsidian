@@ -22,11 +22,13 @@ const (
 	TextKey   = "content"
 	TagsKey   = "tags"
 	NoteIDKey = "path"
+	LastModifiedKey = "last_modified"
 
 	RECENT_NOTES = `
 		SELECT 
 			note.path, 
 			note.title,
+			CAST(last_modified AS TEXT) as last_modified,
 			GROUP_CONCAT(ntag.tag_name) AS tags
 		FROM
 			note
@@ -44,6 +46,7 @@ const (
 		SELECT
 			note.path, 
 			note.title,
+			CAST(last_modified AS TEXT) as last_modified,
 			GROUP_CONCAT(ntag.tag_name) AS tags
 		FROM
 				note

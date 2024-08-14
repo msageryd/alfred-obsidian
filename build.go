@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -13,6 +14,12 @@ import (
 )
 
 func main() {
+	// Build all packages
+	if err := buildAllPackages(); err != nil {
+		fmt.Printf("Error building packages: %v\n", err)
+		os.Exit(1)
+	}
+
 	// Sync info.plist from installed workflow
 	if err := syncInfoPlist(); err != nil {
 		fmt.Printf("Error syncing info.plist: %v\n", err)
@@ -45,6 +52,51 @@ func main() {
 
 	fmt.Printf("Version updated to %s and workflow file %s created.\n", newVersion, workflowPath)
 	fmt.Println("To publish on GitHub, create a new release and upload the .alfredworkflow file from the build directory.")
+}
+
+func buildAllPackages() error {
+	// Find all directories containing Go files
+	var dirs []string
+	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			if info.Name() == ".git" || info.Name() == "build" {
+				return filepath.SkipDir
+			}
+			if containsGoFiles(path) {
+				dirs = append(dirs, path)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("error walking directories: %v", err)
+	}
+
+	// Build each package
+	for _, dir := range dirs {
+		fmt.Printf("Building package in %s\n", dir)
+		cmd := exec.Command("go", "build", "./...")
+		cmd.Dir = dir
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			return fmt.Errorf("error building package in %s: %v", dir, err)
+		}
+	}
+
+	return nil
+}
+
+func containsGoFiles(dir string) bool {
+	files, err := filepath.Glob(filepath.Join(dir, "*.go"))
+	if err != nil {
+		return false
+	}
+	return len(files) > 0
 }
 
 func syncInfoPlist() error {

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/drgrib/alfred"
@@ -34,47 +35,77 @@ var special = []string{
 	"@cdate(",
 }
 
-const argSplit = "|"
+// func getUniqueTagString(tagString string) string {
+// 	if tagString == "" {
+// 		return ""
+// 	}
+// 	tags := strings.Split(tagString, ",")
+// 	uniqueTags := []string{}
+// 	for _, t := range tags {
+// 		isPrefix := false
+// 		for _, other := range tags {
+// 			if t != other && strings.HasPrefix(other, t) {
+// 				isPrefix = true
+// 				break
+// 			}
+// 		}
+// 		if !isPrefix {
+// 			// Multiword tag.
+// 			if strings.Contains(t, " ") {
+// 				t += "#"
+// 			}
+// 			uniqueTags = append(uniqueTags, t)
+// 		}
+// 	}
+// 	sort.Strings(uniqueTags)
+// 	return "#" + strings.Join(uniqueTags, " #")
+// }
 
-func getUniqueTagString(tagString string) string {
-	if tagString == "" {
-		return ""
+func formatTimeDifference(timestampStr string) string {
+	timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
+	if err != nil {
+			return "Invalid timestamp"
 	}
-	tags := strings.Split(tagString, ",")
-	uniqueTags := []string{}
-	for _, t := range tags {
-		isPrefix := false
-		for _, other := range tags {
-			if t != other && strings.HasPrefix(other, t) {
-				isPrefix = true
-				break
-			}
-		}
-		if !isPrefix {
-			// Multiword tag.
-			if strings.Contains(t, " ") {
-				t += "#"
-			}
-			uniqueTags = append(uniqueTags, t)
-		}
+
+	// Convert milliseconds to time.Time
+	then := time.Unix(0, timestamp*1000000) // multiply by 1,000,000 to convert ms to nanoseconds
+	now := time.Now()
+	diff := now.Sub(then)
+
+	switch {
+	case diff < time.Minute:
+			return fmt.Sprintf("(%d sec.)", int(diff.Seconds()))
+	case diff < time.Hour:
+			return fmt.Sprintf("(%d min.)", int(diff.Minutes()))
+	case diff < 24*time.Hour:
+			return fmt.Sprintf("(%d hours)", int(diff.Hours()))
+	case diff < 30*24*time.Hour:
+			return fmt.Sprintf("(%d days)", int(diff.Hours()/24))
+	default:
+			return fmt.Sprintf("(%d months)", int(diff.Hours()/24/30))
 	}
-	sort.Strings(uniqueTags)
-	return "#" + strings.Join(uniqueTags, " #")
 }
 
 func RowToItem(row db.Note, query Query) alfred.Item {
-	// searchCallbackString := getSearchCallbackString(query)
-	return alfred.Item{
-		Title:    row[db.TitleKey],
-		Subtitle: getUniqueTagString(row[db.TagsKey]),
-		// Arg: strings.Join([]string{
-		// 	row[db.NoteIDKey],
-		// 	searchCallbackString,
-		// },
-		// 	argSplit,
-		// ),
-		Arg: row[db.NoteIDKey],
-		Valid: alfred.Bool(true),
+	var timeDiff string
+	tags := row[db.TagsKey]
+
+	lastModifiedStr := row[db.LastModifiedKey]
+	timeDiff = formatTimeDifference(lastModifiedStr)
+
+	subtitleParts := []string{}
+		if tags != "" {
+			subtitleParts = append(subtitleParts, tags)
+		}
+		subtitleParts = append(subtitleParts, timeDiff)
+		
+		subtitle := strings.Join(subtitleParts, " ")
+		
+		return alfred.Item{
+			Title:    row[db.TitleKey],
+			Subtitle: subtitle,
+			Arg:      row[db.NoteIDKey],
+			Valid:    alfred.Bool(true),
 	}
 }
 
@@ -225,9 +256,9 @@ func AutocompleteTags(litedb db.LiteDB, query Query) (bool, error) {
 	return false, nil
 }
 
-func escape(s string) string {
-	return strings.Replace(s, "'", "''", -1)
-}
+// func escape(s string) string {
+// 	return strings.Replace(s, "'", "''", -1)
+// }
 
 func GetSearchRows(litedb db.LiteDB, query Query) ([]db.Note, error) {
 	switch {
