@@ -28,7 +28,7 @@ const (
 		SELECT 
 			note.path, 
 			note.title,
-			CAST(last_modified AS TEXT) as last_modified,
+			CAST(COALESCE(last_opened,last_modified) AS TEXT) as last_modified,
 			GROUP_CONCAT(ntag.tag_name) AS tags
 		FROM
 			note
@@ -38,7 +38,7 @@ const (
 			note.path,
 			note.title
 		ORDER BY
-			note.last_modified DESC
+  		COALESCE(last_opened,last_modified) DESC
 		LIMIT 25
 	`;
 
@@ -46,8 +46,12 @@ const (
 		SELECT
 			note.path, 
 			note.title,
-			CAST(last_modified AS TEXT) as last_modified,
-			GROUP_CONCAT(ntag.tag_name) AS tags
+			GROUP_CONCAT(ntag.tag_name) AS tags,
+			CAST(COALESCE(last_opened,last_modified) AS TEXT) as last_modified,
+			CASE 
+  			WHEN note.title LIKE '%'||$1||'%' THEN 'true'
+  			ELSE 'false'
+			END as is_title_hit
 		FROM
 				note
 		LEFT JOIN
@@ -60,7 +64,7 @@ const (
 				note.title
 		ORDER BY
 				CASE WHEN note.title LIKE '%'||$1||'%' THEN 0 ELSE 1 END,
-				note.last_modified DESC
+				COALESCE(last_opened,last_modified) DESC
 		LIMIT 200;
 `
 
@@ -113,18 +117,13 @@ LIMIT 200
 `
 
 	TAGS_BY_TITLE = `
-		SELECT
-				nt.tag_name
-		FROM
-				note n
-		INNER JOIN
-				note_tag nt ON n.path = nt.note_path
-		WHERE
-			nt.tag_name LIKE '%%%s%%' 
-		ORDER BY
-				n.last_modified DESC
-		LIMIT 25
-`
+		SELECT DISTINCT nt.tag_name
+		FROM note n
+		JOIN note_tag nt ON n.path = nt.note_path
+		WHERE nt.tag_name LIKE '%'||$1||'%'
+		ORDER BY n.last_modified DESC
+		LIMIT 25;
+	`
 
 	NOTE_TITLE_BY_ID = `
 	SELECT
@@ -202,6 +201,9 @@ func NewBearDB() (LiteDB, error) {
 
 func (litedb LiteDB) Query(q string, args ...interface{}) ([]Note, error) {
 	results := []Note{}
+
+	// fmt.Println(q)
+
 	rows, err := litedb.db.Query(q, args...)
 	if err != nil {
 		return results, errors.WithStack(err)
@@ -225,6 +227,7 @@ func (litedb LiteDB) Query(q string, args ...interface{}) ([]Note, error) {
 		for i, colName := range cols {
 			val := columnPointers[i].(*interface{})
 			s, ok := (*val).(string)
+
 			if ok {
 				m[colName] = s
 			} else {

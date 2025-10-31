@@ -61,6 +61,23 @@ var special = []string{
 // 	return "#" + strings.Join(uniqueTags, " #")
 // }
 
+func getIconForNote(row db.Note) *alfred.Icon {
+	// tags := row[db.TagsKey]
+	isTitleHit := row["is_title_hit"]
+
+	//log isTitleHit to console
+	// fmt.Println("isTitleHit")
+	// fmt.Println(isTitleHit)
+	
+	// Define icon mappings based on tags or other metadata
+	switch {
+	case isTitleHit == "true":
+		return &alfred.Icon{Path: "assets/title-hit.png"}
+	default:
+		return &alfred.Icon{Path: "assets/obsidian-icon.png"}
+	}
+}
+
 func formatTimeDifference(timestampStr string) string {
 	timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
 	if err != nil {
@@ -88,17 +105,16 @@ func formatTimeDifference(timestampStr string) string {
 
 func RowToItem(row db.Note, query Query) alfred.Item {
 	var timeDiff string
-	tags := row[db.TagsKey]
+	var tags string = row[db.TagsKey]
 
-	lastModifiedStr := row[db.LastModifiedKey]
+	var lastModifiedStr string = row[db.LastModifiedKey]
 	timeDiff = formatTimeDifference(lastModifiedStr)
 
 	subtitleParts := []string{}
 		if tags != "" {
 			subtitleParts = append(subtitleParts, tags)
 		}
-		subtitleParts = append(subtitleParts, timeDiff)
-		
+		subtitleParts = append(subtitleParts, timeDiff)	
 		subtitle := strings.Join(subtitleParts, " ")
 		
 		return alfred.Item{
@@ -106,6 +122,7 @@ func RowToItem(row db.Note, query Query) alfred.Item {
 			Subtitle: subtitle,
 			Arg:      row[db.NoteIDKey],
 			Valid:    alfred.Bool(true),
+			Icon:     getIconForNote(row),
 	}
 }
 
@@ -233,13 +250,15 @@ func AutocompleteSpecial(litedb db.LiteDB, query Query) (bool, error) {
 
 func AutocompleteTags(litedb db.LiteDB, query Query) (bool, error) {
 	if strings.HasPrefix(query.LastToken, "#") {
-		rows, err := litedb.Query(fmt.Sprintf(db.TAGS_BY_TITLE, db.RemoveTagHashes(query.LastToken)))
+		rows, err := litedb.Query(db.TAGS_BY_TITLE, db.RemoveTagHashes(query.LastToken))
+		// rows, err := litedb.Query(db.TAGS_BY_TITLE, query.LastToken) 
+		// rows, err := litedb.Query(fmt.Sprintf(db.TAGS_BY_TITLE, db.RemoveTagHashes(query.LastToken)))
 		if err != nil {
 			return false, err
 		}
 
 		for _, row := range rows {
-			tag := "#" + row[db.TitleKey]
+			tag := "#" + row["tag_name"]
 			if strings.Contains(tag, " ") {
 				tag += "#"
 			}
@@ -247,7 +266,7 @@ func AutocompleteTags(litedb db.LiteDB, query Query) (bool, error) {
 			alfred.Add(alfred.Item{
 				Title:        tag,
 				Autocomplete: strings.TrimLeft(autocomplete, " "),
-				Valid:        alfred.Bool(false),
+				Valid:        alfred.Bool(true),
 				UID:          tag,
 			})
 		}
