@@ -1,0 +1,10 @@
+[
+  {
+    "label": "Git: Commit All & Push",
+    "command": "git-commit-push.sh",
+    "tags": [
+      "git"
+    ],
+    "hide": "on_success"
+  }
+]
